@@ -15,7 +15,7 @@ data class Write(
     //왜 고유키를 널로 설정하는가? = 널로 설정해야 JPA가 처리할 수 있다.
     var title : String = "",
     var content : String = "",
-    var image: ByteArray ? = null,
+    var image: ByteArray ? = null
 )
 
 

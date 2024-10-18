@@ -25,7 +25,7 @@ class WriteService(private val writeRepository : WriteRepository) {
     // 널처리
 
     //update(수정)
-    //run or with -> 결과를 반환
+    //run or with --> 결과를 반환
     fun update(id: Long,writeDto : WriteDTO){
         val write = writeRepository.findById(id).orElse(null)
         //let을 통해 널이 아닐때만 저장에 성공하도록
