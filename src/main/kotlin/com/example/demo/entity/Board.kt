@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile
 
 // 처음에 붉은 줄이 뜬 이유 : KAPT 설정과 관련이 있다.
 @Entity
-data class Write(
+data class Board(
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -19,7 +19,7 @@ data class Write(
 )
 
 
-data class WriteDTO(
+data class BoardDTO(
     val title : String,
     val content : String,
     val image : MultipartFile? = null
