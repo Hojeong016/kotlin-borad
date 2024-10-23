@@ -7,4 +7,4 @@ import org.springframework.stereotype.Repository
 //public 접근제어자 생략
 //코틀린에서는 기본값이 public,
 @Repository
-interface WriteRepository : JpaRepository<Board, Long>
+interface WriteRepository : JpaRepository<Board, String>

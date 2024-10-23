@@ -3,6 +3,7 @@ package com.example.demo.controller
 import com.example.demo.Service.WriteService
 import com.example.demo.entity.Board
 import com.example.demo.entity.BoardDTO
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -13,13 +14,13 @@ class WriteController(private val writeService: WriteService) {
     fun read() : List<Board> = writeService.findAll()
 
     @PostMapping("/write")
-    fun create( writeDto : BoardDTO) = writeService.create(writeDto)
+    fun create(@RequestBody writeDto : BoardDTO) : Unit = writeService.create(writeDto)
 
     @PatchMapping("/write/{id}")
-    fun update(@PathVariable("id") id:Long, writeDto : BoardDTO) = writeService.update(id, writeDto)
+    fun update(@PathVariable("id") id:String,  @RequestBody writeDto : BoardDTO) : Unit = writeService.update(id, writeDto)
 
     @DeleteMapping("/write/{id}")
-    fun delete(@PathVariable("id") id:Long) = writeService.delete(id)
+    fun delete(@PathVariable("id") id:String) = writeService.delete(id)
 
 
     // 값이 안들어올 경우 코틀린에서은 어떻게 컨트롤러에서 널처리를 하는가?

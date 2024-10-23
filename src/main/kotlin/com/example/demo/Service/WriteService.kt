@@ -26,7 +26,7 @@ class WriteService(private val writeRepository : WriteRepository) {
 
     //update(수정)
     //run or with --> 결과를 반환
-    fun update(id: Long,writeDto : BoardDTO){
+    fun update(id: String,writeDto : BoardDTO){
         val write = writeRepository.findById(id).orElse(null)
         //let을 통해 널이 아닐때만 저장에 성공하도록
         write ?.let{
@@ -39,6 +39,6 @@ class WriteService(private val writeRepository : WriteRepository) {
     }
 
     //delete(삭제)
-    fun delete(id: Long) = writeRepository.deleteById(id)
+    fun delete(id: String) = writeRepository.deleteById(id)
     //널처리
 }

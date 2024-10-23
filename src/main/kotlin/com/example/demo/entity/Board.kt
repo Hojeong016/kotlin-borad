@@ -1,5 +1,7 @@
 package com.example.demo.entity
 
+import com.example.demo.tsid.TSID
+import com.example.demo.tsid.TSIDListener
 import jakarta.persistence.*
 
 
@@ -7,11 +9,11 @@ import org.springframework.web.multipart.MultipartFile
 
 // 처음에 붉은 줄이 뜬 이유 : KAPT 설정과 관련이 있다.
 @Entity
+@EntityListeners(TSIDListener::class)
 data class Board(
-
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    var id : Long ?= null,
+    @TSID
+    var id : String ?= null,
     //왜 고유키를 널로 설정하는가? = 널로 설정해야 JPA가 처리할 수 있다.
     var title : String = "",
     var content : String = "",
