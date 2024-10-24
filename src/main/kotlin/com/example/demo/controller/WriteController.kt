@@ -3,6 +3,7 @@ package com.example.demo.controller
 import com.example.demo.Service.WriteService
 import com.example.demo.entity.Board
 import com.example.demo.entity.BoardDTO
+import com.example.demo.entity.QBoard.board
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -10,17 +11,30 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api")
 class WriteController(private val writeService: WriteService) {
 
+    //전체 게시물 조화
     @GetMapping("/read")
     fun read() : List<Board> = writeService.findAll()
+
+    //단일 게시물 조회
+    @GetMapping("/read/{id}")
+    fun readOnly(@PathVariable("id") id:String) : Board = writeService.findOnly(id)
 
     @PostMapping("/write")
     fun create(@RequestBody writeDto : BoardDTO) : Unit = writeService.create(writeDto)
 
+    //게시물 수정
     @PatchMapping("/write/{id}")
-    fun update(@PathVariable("id") id:String,  @RequestBody writeDto : BoardDTO) : Unit = writeService.update(id, writeDto)
+    fun update(@PathVariable("id") id:String,  @RequestBody writeDto : BoardDTO) : ResponseEntity<String> {
+        writeService.update(id, writeDto)
+        return ResponseEntity.ok("수정에 성공했습니다.")
+    }
 
+    //게시물 삭제
     @DeleteMapping("/write/{id}")
-    fun delete(@PathVariable("id") id:String) = writeService.delete(id)
+    fun delete(@PathVariable("id") id:String) : ResponseEntity<String>{
+        writeService.delete(id)
+        return ResponseEntity.ok("게시물을 삭제하였습니다.")
+    }
 
 
     // 값이 안들어올 경우 코틀린에서은 어떻게 컨트롤러에서 널처리를 하는가?

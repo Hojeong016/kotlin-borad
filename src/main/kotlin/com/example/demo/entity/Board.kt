@@ -6,6 +6,7 @@ import jakarta.persistence.*
 
 
 import org.springframework.web.multipart.MultipartFile
+import java.time.LocalDateTime
 
 // 처음에 붉은 줄이 뜬 이유 : KAPT 설정과 관련이 있다.
 @Entity
@@ -13,18 +14,33 @@ import org.springframework.web.multipart.MultipartFile
 data class Board(
     @Id
     @TSID
+    @Column(name = "board_id")
     var id : String ?= null,
     //왜 고유키를 널로 설정하는가? = 널로 설정해야 JPA가 처리할 수 있다.
+
+    @Column(name = "board_name")
+    var nickname : String ?= null,
+
+    @Column(name = "board_title")
     var title : String = "",
+
+    @Column(name = "board_content")
     var content : String = "",
-    var image: ByteArray ? = null
+
+    @Column(name = "board_file")
+    var image: ByteArray ? = null,
+
+    @Column(name = "board_created_at")
+    var createAt: LocalDateTime = LocalDateTime.now()
 )
 
 
 data class BoardDTO(
     val title : String,
     val content : String,
-    val image : MultipartFile? = null
+    val image : MultipartFile? = null,
+    val nickname : String,
+    val createAt: LocalDateTime = LocalDateTime.now()
 )
 
 //멀티파일 형식으로 데이터를 받아오고 -> 바이너리 타입으로 변환
