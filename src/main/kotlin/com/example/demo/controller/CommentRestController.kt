@@ -21,5 +21,16 @@ class CommentRestController(private val commentService: CommentService) {
         return ResponseEntity.ok("댓글 생성에 성공했습니다.")
     }
 
+    @PatchMapping("/update/{CommentId}")
+    fun updateComment(@PathVariable("CommentId")  commentId: Long,@RequestBody commentDTO: CommentDTO) : ResponseEntity<String> {
+        commentService.updateComment(commentId,commentDTO)
+       return ResponseEntity.ok("수정에 성공했습니다.")
+    }
 
+    @DeleteMapping("/delete/{CommentId}/{nickname}")
+    fun deleteComment(@PathVariable("CommentId") commentId: Long, @PathVariable("nickname") nickname : String ) : ResponseEntity<String> {
+        // 추후에는 인증 객체에서 닉네임을 뽑아와서 보내기
+        commentService.deleteComment(nickname, commentId)
+        return ResponseEntity.ok("댓글 삭제에 성공했습니다.")
+    }
 }

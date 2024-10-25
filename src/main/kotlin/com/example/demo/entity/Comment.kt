@@ -13,6 +13,7 @@ data class Comment(
     var id : Long ?= null,
     // 해당 댓글의 부모 게시글
 
+    //하나의 게시판에는 여러개의 댓글 . 게시물과 댓글을 부모 자식으로 설계
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "board_id")
     var boardId: Board = Board(),
@@ -24,12 +25,16 @@ data class Comment(
     var content : String? = null,
 
     @Column(name = "created_at")
-    var created_at : LocalDateTime = LocalDateTime.now()
+    var created_at : LocalDateTime = LocalDateTime.now(),
+
+    @Column(name = "updated_at")
+    var updated_at: LocalDateTime = LocalDateTime.now()
 )
 
 data class CommentDTO(
     val boardId : String? = null,
     val nickname : String? = null,
     val content: String? = null,
-    val created_at : LocalDateTime = LocalDateTime.now()
+    val created_at : LocalDateTime = LocalDateTime.now(),
+    val updated_at: LocalDateTime? = null
 )
