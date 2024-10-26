@@ -2,12 +2,13 @@ package com.example.demo.entity
 
 import com.example.demo.tsid.TSID
 import com.example.demo.tsid.TSIDListener
+import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
 
 
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
-
+// 추후에 게시글이 보이는 범위 조정하기 (나만보기, 친구만 보기, 전체 보기)
 // 처음에 붉은 줄이 뜬 이유 : KAPT 설정과 관련이 있다.
 @Entity
 @EntityListeners(TSIDListener::class)
@@ -18,7 +19,7 @@ data class Board(
     var id : String ?= null,
     //왜 고유키를 널로 설정하는가? = 널로 설정해야 JPA가 처리할 수 있다.
 
-    @Column(name = "board_name")
+    @Column(name = "nickname")
     var nickname : String ?= null,
 
     @Column(name = "board_title")
@@ -27,6 +28,7 @@ data class Board(
     @Column(name = "board_content")
     var content : String = "",
 
+    @Lob
     @Column(name = "board_file")
     var image: ByteArray ? = null,
 
@@ -34,12 +36,25 @@ data class Board(
     var createAt: LocalDateTime = LocalDateTime.now()
 )
 
-
+//클라이언트에게 전달
+@JsonFormat(pattern = "yyyy-MM-dd")
 data class BoardDTO(
+    val id : String ?= null,
     val title : String,
     val content : String,
-    val image : MultipartFile? = null,
+    val image : String? = null,
     val nickname : String,
+    val createAt: LocalDateTime = LocalDateTime.now()
+)
+
+//JSON 타입으로 날짜를 받을때 JsonFormat 어노테이션을 추가시켜주어야 합니다.
+//추가를 안한상태에서 댓글을 작성에서 목록에 표기 되었을 때 날짜가 이상하게 나옵니다
+//클라이언트에게 받아 온
+data class BoardUploadDTO(
+    val title: String,
+    val content: String,
+    val image: MultipartFile? = null, // 이미지 업로드 시 사용하는 MultipartFile
+    val nickname: String,
     val createAt: LocalDateTime = LocalDateTime.now()
 )
 
