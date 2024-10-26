@@ -3,6 +3,8 @@ package com.example.demo.controller
 import com.example.demo.Service.BoardService
 import com.example.demo.entity.Board
 import com.example.demo.entity.BoardDTO
+import com.example.demo.entity.BoardUploadDTO
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -12,19 +14,19 @@ class BoardController(private val boardService: BoardService) {
 
     //전체 게시물 조화
     @GetMapping("/read")
-    fun read() : List<Board> = boardService.findAll()
+    fun read() : List<BoardDTO> = boardService.findAll()
 
     //단일 게시물 조회
     @GetMapping("/read/{id}")
-    fun readOnly(@PathVariable("id") id:String) : Board = boardService.findOnly(id)
+    fun readOnly(@PathVariable("id") id:String) : BoardDTO= boardService.findOnly(id)
 
     @PostMapping("/write")
-    fun create(@RequestBody writeDto : BoardDTO) : Unit = boardService.create(writeDto)
+    fun create(@ModelAttribute BoardUploadDTO : BoardUploadDTO) : Unit = boardService.create(BoardUploadDTO)
 
     //게시물 수정
     @PatchMapping("/write/{id}")
-    fun update(@PathVariable("id") id:String,  @RequestBody writeDto : BoardDTO) : ResponseEntity<String> {
-        boardService.update(id, writeDto)
+    fun update(@PathVariable("id") id:String, @ModelAttribute BoardUploadDTO : BoardUploadDTO) : ResponseEntity<String> {
+        boardService.update(id, BoardUploadDTO)
         return ResponseEntity.ok("수정에 성공했습니다.")
     }
 

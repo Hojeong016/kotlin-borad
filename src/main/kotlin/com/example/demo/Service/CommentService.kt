@@ -1,28 +1,50 @@
 package com.example.demo.Service
 
-import com.example.demo.entity.Board
-import com.example.demo.entity.Comment
-import com.example.demo.entity.CommentDTO
+import com.example.demo.entity.*
+import com.example.demo.entity.QBoard.board
+import com.example.demo.entity.QComment.comment
 import com.example.demo.repository.CommentRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.util.*
 
 @Service
 class CommentService(private val commentRepository: CommentRepository, private val boardService: BoardService) {
 
     //댓글 생성하기
     @Transactional
-    fun createComment(id:String?,commentDTO : CommentDTO){
+    fun createComment(id:String,createCommentDTO : CreateCommentDTO){
         println("시작")
-        val board : Board = boardService.findOnly(commentDTO.boardId)
+        val dto : BoardDTO = boardService.findOnly(id)
+        val board = Board(id = dto.id,)
         val comment = Comment().apply {
                 this.boardId = board
-                nickname = commentDTO.nickname
-                content = commentDTO.content
-                created_at = commentDTO.created_at}
+                nickname = createCommentDTO.nickname
+                content = createCommentDTO.content
+                createdAt = createCommentDTO.createdAt
+                deep = 0
+                isDeleted = false
+                parentId = null}
             commentRepository.save(comment)
         }
+    //부모 댓글이 되기 때문에 깊이와 부모 아이디 초기값으로 설정해두기
+
+    @Transactional
+    fun createReply(parentId : Long,createReplyDTO : CreateReplyDTO){
+        //부모 댓글 확인
+        val pComment : Comment =  commentRepository.findById(parentId).orElse(null)
+        val reply = Comment().apply {
+            this.parentId = pComment
+            nickname = createReplyDTO.nickname
+            content = createReplyDTO.content
+            createdAt = createReplyDTO.createdAt
+            deep = 1 //을 추후 로직으로 추가하기 ++되게
+            isDeleted = false
+        }
+        commentRepository.save(reply)
+    }
+
 
     //댓글 수정하기 = 내가 작성한 댓글만 수정이 가능하다.
     @Transactional
@@ -31,7 +53,7 @@ class CommentService(private val commentRepository: CommentRepository, private v
         var comment :Comment ?= commentRepository.findById(id).orElse(null)
         comment?.let {
             it.content = commentDTO.content
-            it.updated_at = LocalDateTime.now()
+            it.updatedAt = LocalDateTime.now()
             commentRepository.save(it)
         }
     }
