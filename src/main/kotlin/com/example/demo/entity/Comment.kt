@@ -65,11 +65,11 @@ data class CreateCommentDTO(
 )
 
 //대댓글 dto
+@JsonFormat(pattern = "yyyy-MM-dd")
 data class CreateReplyDTO(
-    val parentId: Long,
     val nickname : String? = null,
-    val content: String? = null,
-    val createdAt : LocalDateTime = LocalDateTime.now(),
+    val content: String? = null
+   /* val createdAt : LocalDateTime = LocalDateTime.now(),*/
 )
 
 //업데이트 dto

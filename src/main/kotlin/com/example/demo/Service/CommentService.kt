@@ -1,13 +1,10 @@
 package com.example.demo.Service
 
 import com.example.demo.entity.*
-import com.example.demo.entity.QBoard.board
-import com.example.demo.entity.QComment.comment
 import com.example.demo.repository.CommentRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.util.*
 
 @Service
 class CommentService(private val commentRepository: CommentRepository, private val boardService: BoardService) {
@@ -35,11 +32,12 @@ class CommentService(private val commentRepository: CommentRepository, private v
         //부모 댓글 확인
         val pComment : Comment =  commentRepository.findById(parentId).orElse(null)
         val reply = Comment().apply {
+            boardId = pComment.boardId
             this.parentId = pComment
             nickname = createReplyDTO.nickname
             content = createReplyDTO.content
-            createdAt = createReplyDTO.createdAt
-            deep = 1 //을 추후 로직으로 추가하기 ++되게
+            createdAt = LocalDateTime.now()/*createReplyDTO.createdAt*/
+            deep = (pComment.deep ?: 0) + 1
             isDeleted = false
         }
         commentRepository.save(reply)
@@ -59,8 +57,16 @@ class CommentService(private val commentRepository: CommentRepository, private v
     }
 
     //댓글 조회하기(게시물)
-    fun readComment(boardId : String) : MutableList<Comment> = commentRepository.findByBoarId(boardId)
+    /*fun readComment(boardId : String) : MutableList<Comment> = commentRepository.findByBoarId(boardId)*/
+    fun readComment(boardId : String) : List<Comment>{
+        val allComments = commentRepository.findByBoarId(boardId)
+        val result = mutableListOf<Comment>()
+        val addedComments = mutableSetOf<Long>()
 
+        allComments.filter { it.parentId == null }.forEach{parentComment ->  addCommentWithReplies(parentComment,result,addedComments,allComments)}
+
+        return result
+    }
     //댓글 조회하기(닉네임)
     fun readCommentByNickname(nickname : String) : MutableList<Comment> = commentRepository.findByNickname(nickname)
 
@@ -68,5 +74,19 @@ class CommentService(private val commentRepository: CommentRepository, private v
     fun deleteComment(nickname: String,commentId: Long) {
         val comment = commentRepository.findById(commentId).orElse(null)
         if(comment.nickname == nickname)  commentRepository.deleteById(commentId) else throw NullPointerException()
+    }
+
+    fun addCommentWithReplies(comment: Comment,result: MutableList<Comment>,addedComments: MutableSet<Long>,allComments: List<Comment>){
+
+        if(addedComments.contains(comment.id)) return
+        result.add(comment)
+        addedComments.add(comment.id!!)
+        // 현재 댓글의 자식 댓글들을 찾습니다.
+        val replies = allComments.filter { it.parentId?.id == comment.id }
+        // 자식 댓글 각각에 대해 재귀적으로 addCommentWithReplies 함수를 호출합니다.
+        replies.forEach { reply ->
+            addCommentWithReplies(reply, result, addedComments, allComments)
+        }
+
     }
 }

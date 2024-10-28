@@ -15,19 +15,13 @@ class CommentRestController(private val commentService: CommentService) {
 
 
     @GetMapping("/read/{BoardId}")
-    fun readComment(@PathVariable("BoardId") boardId: String) : MutableList<Comment> = commentService.readComment(boardId)
+    fun readComment(@PathVariable("BoardId") boardId: String) : List<Comment> = commentService.readComment(boardId)
 
     @PostMapping("/create")
     fun createComment(@RequestBody createCommentDTO: CreateCommentDTO) : ResponseEntity<String> {
         val id: String = createCommentDTO.boardId
         commentService.createComment(id,createCommentDTO)
         return ResponseEntity.ok("댓글 생성에 성공했습니다.")
-    }
-
-    @PostMapping("/create/reply/{parentsId}")
-    fun createReply(@PathVariable("parentsId") parentId:Long, @RequestBody createReplyDTO: CreateReplyDTO):ResponseEntity<String>{
-        commentService.createReply(parentId,createReplyDTO)
-        return ResponseEntity.ok("대댓글 생성에 성공했습니다.\n 댓글 내용 : ${createReplyDTO.content}" )
     }
 
     @PatchMapping("/update/{CommentId}")
@@ -41,5 +35,12 @@ class CommentRestController(private val commentService: CommentService) {
         // 추후에는 인증 객체에서 닉네임을 뽑아와서 보내기
         commentService.deleteComment(nickname, commentId)
         return ResponseEntity.ok("댓글 삭제에 성공했습니다.")
+    }
+
+    @PostMapping("/create/reply/{parentsId}")
+    fun createReply(@PathVariable("parentsId") parentId:Long, @RequestBody createReplyDTO: CreateReplyDTO):ResponseEntity<String>{
+        println(parentId)
+        commentService.createReply(parentId,createReplyDTO)
+        return ResponseEntity.ok("대댓글 생성에 성공했습니다.\n 댓글 내용 : ${createReplyDTO.content}" )
     }
 }
