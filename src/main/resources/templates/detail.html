@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게시물 상세 보기</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f8fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    #post-detail-container {
+      background-color: #ffffff;
+      padding: 20px;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 600px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #1da1f2;
+    }
+
+    .post-info {
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .post-content {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .post-image {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .btn-container {
+      text-align: center;
+    }
+
+    .btn-container button {
+      background-color: transparent;
+      border: 1px solid #1da1f2;
+      color: #1da1f2;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .btn-container button:hover {
+      background-color: #1da1f2;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<div id="post-detail-container">
+  <h2 id="post-title">게시물 제목</h2>
+  <p class="post-info" id="post-author">작성자: 닉네임</p>
+  <p class="post-info" id="post-date">작성일: 작성 날짜</p>
+  <div class="post-content" id="post-content">게시물 내용</div>
+  <img id="post-image" class="post-image" src="" alt="게시물 이미지" style="display: none;"/>
+
+  <div class="btn-container">
+    <button onclick="deletePost()">삭제</button>
+    <button onclick="editPost()">수정</button>
+    <button onclick="goBack()">뒤로가기</button>
+  </div>
+</div>
+
+<script>
+  // 게시물 데이터 가져오기
+  const postId = new URLSearchParams(window.location.search).get('id');
+
+  function loadPostDetails() {
+    fetch(`/api/read/${postId}`)  // 변수명을 postId로 수정
+            .then(response => {
+              if (!response.ok) {
+                return response.text().then(text => { throw new Error(text); });
+              }
+              return response.json();
+            })
+            .then(post => {
+              document.getElementById('post-title').innerText = post.title || "제목 없음";
+              document.getElementById('post-author').innerText = `작성자: ${post.nickname || "익명"}`;
+              document.getElementById('post-content').innerText = post.content || "내용 없음";
+
+              if (post.image) {
+                const postImage = document.getElementById('post-image');
+                postImage.src = post.image;
+                postImage.style.display = 'block';
+              }
+            })
+            .catch(error => {
+              console.error('상세 조회 오류:', error);
+              alert("게시물 상세 조회 중 오류가 발생했습니다.");
+            });
+  }
+
+  document.addEventListener('DOMContentLoaded', loadPostDetails);
+
+  function deletePost() {
+    if (confirm("게시물을 삭제하시겠습니까?")) {
+      fetch(`/api/delete/${postId}`, { method: 'DELETE' })
+              .then(response => {
+                if (!response.ok) throw new Error('삭제 실패');
+                alert('게시물이 삭제되었습니다.');
+                window.location.href = '/'; // 목록 페이지로 돌아가기
+              })
+              .catch(error => alert("삭제 중 오류가 발생했습니다."));
+    }
+  }
+
+  function editPost() {
+    window.location.href = `/edit?id=${postId}`;
+  }
+
+  function goBack() {
+    window.history.back();
+  }
+
+  document.addEventListener('DOMContentLoaded', loadPostDetails);
+</script>
+</body>
+</html>

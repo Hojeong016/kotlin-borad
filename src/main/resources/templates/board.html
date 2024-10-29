@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>트위터 스타일 게시판</title>
+    <style>
+        /* 트위터 스타일 기본 폰트 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f8fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #1da1f2;
+        }
+
+        #write-form-container {
+            background-color: #ffffff;
+            padding: 20px;
+            margin: 20px auto;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        #write-form label, #write-form input, #write-form textarea {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        #write-form textarea {
+            height: 100px;
+            resize: none;
+        }
+
+        #write-form button {
+            background-color: #1da1f2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #write-form button:hover {
+            background-color: #0c85d0;
+        }
+
+        #post-container {
+            margin: 20px auto;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .post-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-card h4 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1da1f2;
+        }
+
+        .post-card h5 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .post-card p {
+            margin: 0 0 15px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .post-card img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .post-card button {
+            background-color: transparent;
+            border: 1px solid #1da1f2;
+            color: #1da1f2;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .post-card button:hover {
+            background-color: #1da1f2;
+            color: white;
+        }
+
+        #post-detail {
+            background-color: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+<h1>게시판</h1>
+
+<!-- 게시물 작성 폼 -->
+<div id="write-form-container">
+    <h3>새 게시물 작성</h3>
+    <form id="write-form" enctype="multipart/form-data">
+        <label for="nickname">닉네임:</label><br>
+        <input type="text" id="nickname" name="nickname" required><br><br>
+
+        <label for="post-title">제목:</label><br>
+        <input type="text" id="post-title" name="title" required><br><br>
+
+        <label for="post-content">내용:</label><br>
+        <textarea id="post-content" name="content" required></textarea><br><br>
+
+        <!-- 이미지 업로드 필드 -->
+        <label for="post-image">이미지:</label><br>
+        <input type="file" id="post-image" name="image"><br><br>
+
+        <button type="submit">작성하기</button>
+    </form>
+</div>
+
+<hr>
+
+<!-- 게시물 목록을 표시할 영역 -->
+<div id="post-container">
+    <h3>게시물 목록</h3>
+    <!-- 게시물이 여기에 동적으로 추가됩니다 -->
+</div>
+
+<!-- 게시물 상세 정보를 표시할 영역 -->
+<div id="post-detail">
+    <!-- 상세 정보가 여기에 표시됩니다 -->
+</div>
+
+<script>
+    // 게시물 목록을 불러오는 함수
+    function loadAllPosts() {
+        fetch('/api/read')
+            .then(response => {
+                if (!response.ok) {
+                    // 서버 오류 발생 시 텍스트로 오류 메시지 읽기
+                    return response.text().then(text => { throw new Error(text); });
+                }
+                return response.json();  // 정상 응답일 경우 JSON 파싱
+            })
+            .then(posts => {
+                const postContainer = document.getElementById('post-container');
+                postContainer.innerHTML = ''; // 기존 내용 삭제
+
+                posts.forEach(post => {
+                    const postCard = document.createElement('div');
+                    postCard.classList.add('post-card');
+                    postCard.innerHTML = `
+                        <h4>${post.nickname}</h4>
+                        <h5>${post.title}</h5>
+                        <p>${post.content}</p>
+                        <img src="${post.image}" alt="게시물 이미지" />
+                        <button onclick="loadPost('${post.id}')">자세히 보기</button>
+                        <button onclick="deletePost('${post.id}')">삭제</button>
+                        <button onclick="editPost('${post.id}')">수정</button>
+                    `;
+                    postContainer.appendChild(postCard);
+                });
+            })
+            .catch(error => {
+                console.error('게시물 불러오기 오류:', error);
+                alert("서버 오류가 발생했습니다.");
+            });
+    }
+
+    // 특정 게시물 조회 함수 (loadPost)
+    // 특정 게시물 조회 함수 (loadPost)
+    function loadPost(id) {
+        window.location.href = `/detail.html?id=${id}`;
+    }
+
+    // 게시물 작성 함수 (이미지와 닉네임 포함)
+    function createPost() {
+        const nickname = document.getElementById('nickname').value;
+        const postTitle = document.getElementById('post-title').value;
+        const postContent = document.getElementById('post-content').value;
+        const postImage = document.getElementById('post-image').files[0];  // 이미지 파일 가져오기
+
+        // 폼 유효성 검사
+        if (!nickname.trim() || !postTitle.trim() || !postContent.trim()) {
+            alert("모든 필드를 입력해주세요.");
+            return;
+        }
+
+        // 이미지 파일 형식 검사 (선택 사항)
+        if (postImage && !postImage.type.startsWith('image/')) {
+            alert("이미지 파일 형식이 올바르지 않습니다.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('nickname', nickname);  // 닉네임 추가
+        formData.append('title', postTitle);
+        formData.append('content', postContent);
+        if (postImage) {
+            formData.append('image', postImage);  // 이미지가 있을 경우만 추가
+        }
+
+        fetch('/api/write', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+                alert('게시물이 성공적으로 작성되었습니다.');
+                loadAllPosts(); // 게시물 목록 갱신
+                document.getElementById('write-form').reset(); // 작성 폼 초기화
+            })
+            .catch(error => {
+                console.error('게시물 작성 오류:', error);
+                alert("게시물 작성 중 오류가 발생했습니다.");
+            });
+    }
+
+    // 작성 폼 제출 이벤트 처리
+    document.getElementById('write-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        createPost();
+    });
+
+    // 페이지 로드 시 게시물 목록을 불러옵니다.
+    document.addEventListener('DOMContentLoaded', loadAllPosts);
+</script>
+</body>
+</html>
